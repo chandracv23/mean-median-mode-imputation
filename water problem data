@@ -1,0 +1,66 @@
+# Water problem dataset
+
+
+import pandas as pd
+df=pd.read_csv('water_potability.csv',nrows=1000,usecols=['ph','Sulfate','Potability'])
+
+df
+
+df.isnull().sum()
+
+df.ph.isnull().mean()
+
+df['ph']
+
+df['ph'].dropna().sample(df['ph'].isnull().sum(),random_state=1)
+
+df['Sulfate'].dropna().sample(df['Sulfate'].isnull().sum(),random_state=0)
+
+df['ph'].fillna(df['ph'].mean())
+
+df.ph.mean()
+
+df[df['ph'].isnull()].index
+df[df['Sulfate'].isnull()].index
+
+def impute_nan(df,variable,median):
+    df[variable+"_median"]=df[variable].fillna(median)
+    df[variable+"_random"]=df[variable]
+    ##It will have the random sample to fill the na
+    random_sample=df[variable].dropna().sample(df[variable].isnull().sum(),random_state=0)
+    ##pandas need to have same index in order to merge the dataset
+    random_sample.index=df[df[variable].isnull()].index
+    df.loc[df[variable].isnull(),variable+'_random']=random_sample
+
+median=df.ph.median()
+median1=df.Sulfate.median()
+
+median1
+
+impute_nan(df,"ph",median)
+impute_nan(df,'Sulfate',median1)
+
+print(df.ph.std())
+print(df.ph_random.std())
+
+df.head()
+
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+df['ph'].plot(kind='kde', ax=ax,color='red')
+#df.ph_median.plot(kind='kde', ax=ax, color='red')
+df.ph_random.plot(kind='kde', ax=ax, color='blue')
+lines, labels = ax.get_legend_handles_labels()
+ax.legend(lines, labels, loc='best')
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+df['Sulfate'].plot(kind='kde', ax=ax,color='red')
+#df.ph_median.plot(kind='kde', ax=ax, color='red')
+df.Sulfate_random.plot(kind='kde', ax=ax, color='blue')
+lines, labels = ax.get_legend_handles_labels()
+ax.legend(lines, labels, loc='best')
+
